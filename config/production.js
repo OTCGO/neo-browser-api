@@ -6,20 +6,11 @@ module.exports = {
   },
   rpc: 'http://127.0.0.1:10332',
   network: 'mainnet',
-  dbNep5: {
-    options: {
-      host: '127.0.0.1',
-      user: 'otcgo',
-      pass: 'u3fhhrPr'
-    },
-    isAuthSource: 'admin',
-    db: 'neo-otcgo'
-  },
   dbGlobal: {
     options: {
       host: '127.0.0.1',
-      user: 'otcgo',
-      pass: 'u3fhhrPr'
+      user: '',
+      pass: ''
     },
     isAuthSource: 'admin',
     db: 'neo-main'

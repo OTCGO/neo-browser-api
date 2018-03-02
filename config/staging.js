@@ -17,7 +17,7 @@ module.exports = {
     },
     dbGlobal: {
       options: {
-        host: 'future.otcgo.cn'
+        host: ''
         // user: 'otcgo',
         // pass: 'u3fhhrPr'
       },

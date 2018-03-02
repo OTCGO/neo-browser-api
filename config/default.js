@@ -8,7 +8,7 @@ module.exports = {
   network: 'testnet',
   dbGlobal: {
     options: {
-      host: '222.209.145.228'
+      host: ''
       // user: 'otcgo',
       // pass: 'u3fhhrPr'
     },
