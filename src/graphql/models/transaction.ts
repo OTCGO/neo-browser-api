@@ -17,6 +17,9 @@ import * as config from 'config'
 
 const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
 
+
+const assetObj = {}
+
 const transaction = new graphql.GraphQLObjectType({
   name: 'transaction',
   description: 'This is a transaction',
@@ -117,11 +120,21 @@ const transaction = new graphql.GraphQLObjectType({
                 },
                 name: {
                   type: graphql.GraphQLString,
-                  async resolve (info) {
-                    if (info & info.asset) {
-                      return config.get(`asserts.${info.asset}`)
-                     // console.log('info', info)
-                    }
+                  async resolve (utxo) {
+                    try {
+                      // console.log('assetObj[nep5.assetId]', assetObj[nep5.assetId])
+                      if (utxo && !assetObj[utxo.asset]) {
+                       const dbGlobal = await dbGlobalClient.connection()
+                       const reulst = await dbGlobal.asset.findOne({assetId: utxo.asset})
+                       assetObj[utxo.asset] = reulst.name[0].name
+
+                      }
+
+                      return assetObj[utxo.asset]
+
+                     } catch (error) {
+                      // console.error('vout:error', error)
+                     }
                   }
                 },
               },
@@ -171,10 +184,21 @@ const transaction = new graphql.GraphQLObjectType({
           name: {
             type: graphql.GraphQLString,
             async resolve (vout) {
-              if (vout) {
-                return config.get(`asserts.${vout.asset}`)
-               // console.log('info', info)
-              }
+                try {
+                  // console.log('assetObj[nep5.assetId]', assetObj[nep5.assetId])
+                  if (vout && !assetObj[vout.asset]) {
+                   const dbGlobal = await dbGlobalClient.connection()
+                   const reulst = await dbGlobal.asset.findOne({assetId: vout.asset})
+                   assetObj[vout.asset] = reulst.name[0].name
+
+                  }
+                  console.log('assetObj[vout.asset]', assetObj)
+                  return assetObj[vout.asset]
+
+                 } catch (error) {
+                  // console.error('vout:error', error)
+                 }
+
             }
           }
         }
@@ -193,15 +217,21 @@ const transaction = new graphql.GraphQLObjectType({
            },
            symbol: {
              type: graphql.GraphQLString,
-            //  async resolve (address) {
-            //   console.log('address', address)
-            //    if (address) {
-            //     const dbNep5 = await dbNep5Client.connection()
-            //     const asset = await dbNep5.nep5_m_assets.findOne({contract: address.contract})
-            //     console.log('asset', asset)
-            //     return asset.symbol
-            //    }
-            //  }
+             async resolve (nep5) {
+               try {
+                // console.log('assetObj[nep5.assetId]', assetObj[nep5.assetId])
+                if (nep5 && !assetObj[nep5.assetId]) {
+                 const dbGlobal = await dbGlobalClient.connection()
+                 const reulst = await dbGlobal.asset.findOne({assetId: nep5.assetId})
+                 // console.log('reulst', reulst)
+                 assetObj[nep5.assetId] = reulst.symbol
+                }
+
+                return assetObj[nep5.assetId]
+               } catch (error) {
+                // console.error('nep5:error', error)
+               }
+             }
            },
            value: {
              type: graphql.GraphQLString

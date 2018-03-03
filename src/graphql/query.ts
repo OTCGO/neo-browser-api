@@ -134,7 +134,7 @@ const query = new graphql.GraphQLObjectType({
       }),
       async resolve (root, args) {
         const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, 0, dbGlobal.assert, undefined, queryBuilder({}, args), {})
+        return pageQuery(args.skip, 0, dbGlobal.asset, undefined, queryBuilder({}, args), {})
 
         // const dbNep5 = await dbNep5Client.connection()
         // const resultNep5: any  = await pageQuery(args.skip, 0, dbNep5.nep5_m_assets, undefined, queryBuilder({}, args), {})

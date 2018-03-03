@@ -22,6 +22,27 @@ const getAssetState = async (assetId) => {
       })
 }
 
+const getNep5Symbol = async (assetId) => {
+  const options = {
+      method: 'POST',
+      url: config.get('rpc'),
+      headers:
+      {
+        'content-type': 'application/json'
+      },
+      body: {
+        jsonrpc: '2.0', method: 'invokefunction', params: [assetId, 'symbol', []], id: 1
+      },
+      json: true
+    }
+    return new Promise<string>((resolve, reject) => {
+      request(options, function (error, response, body) {
+        if (error) return reject(error)
+        return resolve(body)
+      })
+    })
+}
+
 
 
 export { getAssetState }

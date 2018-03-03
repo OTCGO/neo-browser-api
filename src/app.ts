@@ -7,6 +7,8 @@
  * Copyright (c) 2017 Your Company
  */
 
+import * as dotenv from 'dotenv'
+dotenv.config()
 import * as bodyParser from 'body-parser'
 import * as cors from 'cors'
 import * as express from 'express'
@@ -16,6 +18,9 @@ import * as log4js from 'log4js'
 // import { RPX } from './boot'
 import router from './router'
 import { APIOutputMiddleware } from './middlewares'
+
+
+
 
 // log config
 log4js.layouts.addLayout('json', function (config) {
