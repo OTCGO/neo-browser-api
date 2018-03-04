@@ -10,14 +10,14 @@ class DBClient {
   private dbClient
 
   constructor (dbConfig) {
-      const { options, db } = dbConfig
-      const isReplset = dbConfig.isReplset || ['staging', 'production'].indexOf(process.env.NODE_ENV) > -1
-      const isAuthSource = dbConfig.isAuthSource || ['staging', 'production'].indexOf(process.env.NODE_ENV) > -1
+      // const { mongodbUrl } = dbConfig
+      // const isReplset = dbConfig.isReplset || ['staging', 'production'].indexOf(process.env.NODE_ENV) > -1
+      // const isAuthSource = dbConfig.isAuthSource || ['staging', 'production'].indexOf(process.env.NODE_ENV) > -1
 
-      const auth = options.user ? `${options.user}:${options.pass}@` : ''
-      const replset = isReplset ? '?replicaSet=rs1' : ''
-      const authSource = isReplset ? (isAuthSource ? `&authSource=${isAuthSource}` : '') : (isAuthSource ? `?authSource=${isAuthSource}` : '')
-      this.MongoUrl = `mongodb://${auth}${options.host}/${db}${replset}${authSource}`
+      // const auth = options.user ? `${options.user}:${options.pass}@` : ''
+      // const replset = isReplset ? '?replicaSet=rs1' : ''
+      // const authSource = isReplset ? (isAuthSource ? `&authSource=${isAuthSource}` : '') : (isAuthSource ? `?authSource=${isAuthSource}` : '')
+      this.MongoUrl = `mongodb://${dbConfig}`
     // this.MongoUrl = `mongodb://otcgo:u3fhhrPr@114.215.30.71:27017/neo-otcgo?authSource=admin`
       // mongodb:// otcgo:u3fhhrPr@127.0.0.1:27017/?authSource=admin&replicaSet=rs1
       logger.info(`dbClient - dbconfig: ${JSON.stringify(dbConfig)}`)

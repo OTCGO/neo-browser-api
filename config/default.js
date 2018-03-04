@@ -6,12 +6,7 @@ module.exports = {
   },
   rpc: process.env.RPC,
   network: process.env.NETWORK,
-  dbGlobal: {
-    options: {
-      host: process.env.HOST
-    },
-    db: process.env.DB
-  },
+  dbGlobal: process.env.MONGODB_URL,
   log: {
     appenders: [ // 日志
       {
