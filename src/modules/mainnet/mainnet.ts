@@ -10,6 +10,7 @@
 import * as log4js from 'log4js'
 import * as config from 'config'
 import { Router } from 'express'
+import { Decimal } from 'decimal.js'
 import { NRequest } from '../../interface'
 import * as graphqlHTTP from 'express-graphql'
 import { Request as WebHandler } from '../../utils'
@@ -77,9 +78,9 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
 
         const asset: any = await dbGlobal.asset.findOne({assetId: key})
 
-        let balances = 0
+        let balances: any = 0
         obj[key].forEach((utxo) => {
-          balances += parseFloat(utxo.value)
+          balances = Decimal.add(balances, utxo.value)
         })
 
         globalArr.push({
