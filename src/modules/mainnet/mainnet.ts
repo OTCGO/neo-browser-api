@@ -87,7 +87,7 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
           assetId: key,
           name: asset.name[0].name,
           type: asset.type,
-          balances: balances || 0
+          balances
         })
       }
 
@@ -104,7 +104,7 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
               assetId: item.assetId,
               name: item.symbol,
               type: 'nep5',
-              balances: balances || 0
+              balances: `${balances || 0}`
             }
           })
       })
