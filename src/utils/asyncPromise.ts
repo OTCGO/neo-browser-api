@@ -14,8 +14,6 @@ const parallel = (task, limit) => {
     console.log('task', task)
     return new Promise<string>((resolve, reject) => {
         parallelLimit(task, limit, (err, result) => {
-            console.log('err', err)
-            console.log('result', result)
             if (err) return reject(err)
             resolve(result)
         })

@@ -17,8 +17,11 @@ import { Request as WebHandler } from '../../utils'
 import schema from '../../graphql'
 import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
+import { DBClient } from '../../lib'
 
 
+
+const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
 
 const logger = log4js.getLogger('mainnet')
 const mainnet: Router = Router()
@@ -49,30 +52,27 @@ mainnet.use(`/public/graphql`, graphqlHTTP({
 
 mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
      try {
-      // const { address } = req.params
-      // logger.info('address', address)
-      // logger.info('rpc', config.get('rpc'))
-      // // const result = await api.nep5.getTokenBalance(config.get('rpc'), '0d821bd7b6d53f5c2b40e217c6defc8bbe896cf5', 'ARGpitrDs1rcynXmBd6JRgvEJ8PLSetFiW')
-      // // logger.info('result', result)
-      // const asset: any = await Asset.find()
-      // logger.info('asset', asset)
-      // const arr = []
-      // asset.forEach(item => {
-      //     arr.push(async () => {
-      //       const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.contract.substring(2), address)
-      //       return {
-      //         _id: item._id,
-      //         updatedAt: item.updatedAt,
-      //         contract: item.contract,
-      //         createdAt: item.createdAt,
-      //         symbol: item.symbol,
-      //         balances
-      //       }
-      //     })
-      // })
-      // const result = await parallel(arr, 10)
-      // logger.info('asset', result)
-      return res.apiSuccess('ok')
+      const { address } = req.params
+      logger.info('address', address)
+      logger.info('rpc', config.get('rpc'))
+      const dbGlobal = await dbGlobalClient.connection()
+      const asset: any = await dbGlobal.asset.find({type: 'nep5'}).toArray()
+
+      const arr = []
+      asset.forEach(item => {
+          arr.push(async () => {
+            const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
+              return {
+                _id: item._id,
+                assetId: item.assetId,
+                name: item.symbol,
+                type: 'nep5',
+                balances: balances || 0
+              }
+          })
+      })
+      const result = await parallel(arr, 10)
+      return res.apiSuccess(result)
 
     } catch (error) {
       logger.error('mainnet', error)
