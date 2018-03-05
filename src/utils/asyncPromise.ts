@@ -11,7 +11,6 @@ import { parallelLimit } from 'async'
 
 
 const parallel = (task, limit) => {
-    console.log('task', task)
     return new Promise<string>((resolve, reject) => {
         parallelLimit(task, limit, (err, result) => {
             if (err) return reject(err)

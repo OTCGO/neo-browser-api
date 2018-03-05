@@ -22,6 +22,7 @@ import { DBClient } from '../../lib'
 
 
 const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
+const dbUtxolClient: any = new DBClient(config.get('dbUtxo'))
 
 const logger = log4js.getLogger('mainnet')
 const mainnet: Router = Router()
@@ -53,26 +54,61 @@ mainnet.use(`/public/graphql`, graphqlHTTP({
 mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
      try {
       const { address } = req.params
-      logger.info('address', address)
-      logger.info('rpc', config.get('rpc'))
-      const dbGlobal = await dbGlobalClient.connection()
-      const asset: any = await dbGlobal.asset.find({type: 'nep5'}).toArray()
 
+
+      const dbGlobal = await dbGlobalClient.connection()
+      const dbUtxo = await dbUtxolClient.connection()
+      const uxtos = await dbUtxo.utxos.find({address, spent_height: {$exists: false}}).toArray()
+
+
+
+
+      const obj: any = {}
+      for (const item of uxtos){
+        if (!obj[item.asset]) {
+          obj[item.asset] = []
+        }
+        obj[item.asset].push({prevIndex: item.index, prevHash: item.txid, value: item.value})
+        // globalArr.push(obj)
+      }
+
+      const globalArr = []
+      for (const key in obj) {
+
+        const asset: any = await dbGlobal.asset.findOne({assetId: key})
+
+        let balances = 0
+        obj[key].forEach((utxo) => {
+          balances += parseFloat(utxo.value)
+        })
+
+        globalArr.push({
+          assetId: key,
+          name: asset.name[0].name,
+          type: asset.type,
+          balances: balances || 0
+        })
+      }
+
+
+
+
+
+      const asset: any = await dbGlobal.asset.find({type: 'nep5'}).toArray()
       const arr = []
       asset.forEach(item => {
           arr.push(async () => {
             const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
-              return {
-                _id: item._id,
-                assetId: item.assetId,
-                name: item.symbol,
-                type: 'nep5',
-                balances: balances || 0
-              }
+            return {
+              assetId: item.assetId,
+              name: item.symbol,
+              type: 'nep5',
+              balances: balances || 0
+            }
           })
       })
       const result = await parallel(arr, 10)
-      return res.apiSuccess(result)
+      return res.apiSuccess(globalArr.concat(result))
 
     } catch (error) {
       logger.error('mainnet', error)

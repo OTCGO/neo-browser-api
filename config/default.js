@@ -7,6 +7,7 @@ module.exports = {
   rpc: process.env.RPC,
   network: process.env.NETWORK,
   dbGlobal: process.env.MONGODB_URL,
+  dbUtxo: process.env.MONGODB_UTXO,
   log: {
     appenders: [ // 日志
       {
