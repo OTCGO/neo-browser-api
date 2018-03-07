@@ -77,6 +77,12 @@ const transaction = new graphql.GraphQLObjectType({
     type: {
       type: graphql.GraphQLString
     },
+    sys_fee: {
+      type: graphql.GraphQLString
+    },
+    net_fee: {
+      type: graphql.GraphQLString
+    },
     scripts: {
       type: new graphql.GraphQLList(new graphql.GraphQLObjectType({
         name: 'scripts',
@@ -139,25 +145,17 @@ const transaction = new graphql.GraphQLObjectType({
                 },
               },
             }),
-         //   async resolve (vin, args) {
-              // try {
-              //   if (vin) {
-              //     const dbGlobal = await dbGlobalClient.connection()
-              //     const result = await dbGlobal.b_neo_m_transactions.findOne({txid: vin.txid}, {vout: 1})
-              //     console.log('args', args)
-              //     return result.vout[vin.vout]
-              //   }
-              // } catch (error) {
-              //   console.error('error:vin', error)
-              // }
-
-
-            //   return result.vout[vin.n]
-            // //    if (vin) {
-
-            //     console.log('vin', vin)
-            //  //   return asset.symbol
-            //    }
+          //  async resolve (vin, args) {
+          //     try {
+          //       if (vin) {
+          //         const dbGlobal = await dbGlobalClient.connection()
+          //         const result = await dbGlobal.b_neo_m_transactions.findOne({txid: vin.txid}, {vout: 1})
+          //         console.log('args', args)
+          //         return result.vout[vin.vout]
+          //       }
+          //     } catch (error) {
+          //       console.error('error:vin', error)
+          //     }
           //   }
           }
 
