@@ -17,6 +17,9 @@ const block = new graphql.GraphQLObjectType({
     _id: {
       type: graphql.GraphQLString
     },
+    hash: {
+        type: graphql.GraphQLString
+    },
     size: {
         type: graphql.GraphQLInt
     },
