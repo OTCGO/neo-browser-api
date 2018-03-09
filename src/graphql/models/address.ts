@@ -9,6 +9,12 @@
 
 
 import * as graphql from 'graphql'
+import { DBClient } from '../../lib'
+import * as config from 'config'
+
+
+
+const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
 
 
 const address = new graphql.GraphQLObjectType({
@@ -23,7 +29,20 @@ const address = new graphql.GraphQLObjectType({
     },
     blockIndex: {
       type: graphql.GraphQLInt
-    }
+    },
+    time: {// 时间
+      type: graphql.GraphQLInt,
+      async resolve (transaction) {
+        try {
+          const dbGlobal = await dbGlobalClient.connection()
+          const reulst = await dbGlobal.block.findOne({index: transaction.blockIndex}, {time: 1})
+          return reulst.time
+        } catch (error) {
+          return undefined
+        }
+
+      }
+    },
   }
 })
 

@@ -30,44 +30,19 @@ const transaction = new graphql.GraphQLObjectType({
     txid: {
       type: graphql.GraphQLString
     },
-    /*
-    to: {
-     type: new graphql.GraphQLObjectType({
-       name: 'toAddress',
-       fields: {
-          value: {
-            type: graphql.GraphQLString
-          },
-          hash: {
-            type: graphql.GraphQLString
-          }
-       }
-     })
-    },
-    from: {
-      type: new graphql.GraphQLObjectType({
-        name: 'fromAddress',
-        fields: {
-           value: {
-             type: graphql.GraphQLString
-           },
-           hash: {
-             type: graphql.GraphQLString
-           }
+    time: {// 时间
+      type: graphql.GraphQLInt,
+      async resolve (transaction) {
+        try {
+          const dbGlobal = await dbGlobalClient.connection()
+          const reulst = await dbGlobal.block.findOne({index: transaction.blockIndex}, {time: 1})
+          return reulst.time
+        } catch (error) {
+          return undefined
         }
-      })
-    },
-    symbol: {
-      type: graphql.GraphQLString,
-      async resolve (address) {
-        const asset = await Asset.findOne({contract: address.contract})
-        return asset.symbol
+
       }
     },
-    value: {
-      type: graphql.GraphQLString
-    },
-    */
     blockIndex: {
       type: graphql.GraphQLInt
     },

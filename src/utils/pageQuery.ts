@@ -19,7 +19,7 @@
 import async from 'async'
 
 
-const pageQuery = function (skip = 0, limit = 20, Model, aggregate= [], queryParams= {}, sortParams: any = {createdAt: -1}, display: any= {}) {
+const pageQuery = function (skip = 0, limit = 20, Model, aggregate= [], queryParams= {}, sortParams: any = {blockIndex: -1}, display: any= {}) {
   console.log('queryParams', queryParams)
   return new Promise((resolve, reject) => {
     const $page = {

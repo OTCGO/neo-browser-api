@@ -11,7 +11,7 @@ import * as graphql from 'graphql'
 import * as config from 'config'
 import * as _ from 'lodash'
 import * as async from 'async'
-import { address, transaction, asset, block } from './models'
+import { address, transaction, asset, block, system } from './models'
 // import { Address, Transaction, Asset } from '../models'
 import { queryBuilder, argsBuilder, pageQuery } from '../utils'
 import { DBClient } from '../lib'
@@ -56,7 +56,7 @@ const query = new graphql.GraphQLObjectType({
         //   delete args.address
         // }
          const dbGlobal = await dbGlobalClient.connection()
-         return  pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), {})
+         return  pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
       }
     },
     TransactionQuery: {
@@ -171,6 +171,51 @@ const query = new graphql.GraphQLObjectType({
       async resolve (root, args) {
         const dbGlobal = await dbGlobalClient.connection()
         return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
+      }
+    },
+    SystemQuery: {
+      type: new graphql.GraphQLNonNull(new graphql.GraphQLObjectType({
+        name: 'SystemQuery',
+        fields: {
+          rows: {
+            type: system
+          }
+        }
+      })),
+      args: argsBuilder({
+        _id: {
+          type: graphql.GraphQLString
+        }
+      }),
+      async resolve (root, args) {
+        const dbGlobal = await dbGlobalClient.connection()
+
+
+        const blockNumMinObj  = await dbGlobal.block.find({}, {index: 1, time: 1}).sort({index: 1}).limit(1).toArray()
+        console.log('blockNumMinObj', blockNumMinObj)
+        const blockNumMaxObj  = await dbGlobal.block.find({}, {index: 1, time: 1}).sort({index: -1}).limit(1).toArray()
+        // console.log('blockNum', blockNumMaxObj)
+
+        const assetNum = await dbGlobal.asset.find().count()
+        // console.log('assetObj', assetNum)
+
+        const addressNum = await dbGlobal.address.find().count()
+       // console.log('addressObj', addressNum)
+
+        const transactionNum = await dbGlobal.transaction.find().count()
+       // console.log('transactionObj', transactionNum)
+
+        return {
+          rows: {
+            startTime:  blockNumMinObj[0].time,
+            curretTime: blockNumMaxObj[0].time,
+            blockNum: blockNumMaxObj[0].index + 1,
+            assetNum,
+            addressNum,
+            transactionNum
+          }
+        }
+       // return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
       }
     },
   }
