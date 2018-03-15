@@ -82,13 +82,15 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
         obj[key].forEach((utxo) => {
           balances = Decimal.add(balances, utxo.value)
         })
+        if (asset.name.length > 0) {
+          globalArr.push({
+            assetId: key,
+            name: asset.name[0].name,
+            type: asset.type,
+            balances
+          })
+        }
 
-        globalArr.push({
-          assetId: key,
-          name: asset.name[0].name,
-          type: asset.type,
-          balances
-        })
       }
 
 
