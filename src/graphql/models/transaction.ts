@@ -196,12 +196,13 @@ const transaction = new graphql.GraphQLObjectType({
                 if (nep5 && !assetObj[nep5.assetId]) {
                  const dbGlobal = await dbGlobalClient.connection()
                  const reulst = await dbGlobal.asset.findOne({assetId: nep5.assetId})
-                 // console.log('reulst', reulst)
+                 console.log('reulst', reulst)
                  assetObj[nep5.assetId] = reulst.symbol
                 }
 
                 return assetObj[nep5.assetId]
                } catch (error) {
+                console.log('nep5', error)
                 // console.error('nep5:error', error)
                }
              }

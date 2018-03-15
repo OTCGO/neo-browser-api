@@ -31,9 +31,8 @@ const asset = new graphql.GraphQLObjectType({
       async resolve(asset) {
         try {
           if (!asset.symbol && asset.type === 'nep5') {
-            // const result = await api.nep5.getTokenInfo(config.get('rpc'), `${asset.assetId.substring(2)}`)
-            const result = await api.nep5.getTokenInfo(config.get('rpc'), `67817fa4003996bf9ecf2a55aaa7eb5ee08a8514cf8cbe9065c3e5404f2c1adc`)
-
+            const result = await api.nep5.getTokenInfo(config.get('rpc'), `${asset.assetId.substring(2)}`)
+            console.log('result', result)
             if (result.symbol)  {
               // update mongo
               const dbGlobal = await dbGlobalClient.connection()
@@ -59,6 +58,7 @@ const asset = new graphql.GraphQLObjectType({
           }
           return asset.symbol
         } catch (error) {
+          console.log('error', error)
           // console.log('error', error)
         }
 
