@@ -81,6 +81,9 @@ const query = new graphql.GraphQLObjectType({
         blockIndex: {
           type: graphql.GraphQLInt
         },
+        type: {
+          type: graphql.GraphQLString
+        },
         address: {
           type: graphql.GraphQLString
         }
