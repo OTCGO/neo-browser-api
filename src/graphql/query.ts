@@ -134,8 +134,25 @@ const query = new graphql.GraphQLObjectType({
         symbol: {
           type: graphql.GraphQLString
         },
+        search: {
+          type: graphql.GraphQLString
+        }
       }),
       async resolve (root, args) {
+
+
+        // if search
+        if (args.search) {
+          args.$or = [
+             {assetId: new RegExp(args.search)},
+            {name: new RegExp(args.search)},
+            {type: new RegExp(args.search)},
+            {symbol:  new RegExp(args.search)}
+          ]
+
+          delete args.search
+        }
+
         const dbGlobal = await dbGlobalClient.connection()
         return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({}, args), {})
 
