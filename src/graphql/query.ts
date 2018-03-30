@@ -86,6 +86,9 @@ const query = new graphql.GraphQLObjectType({
         },
         address: {
           type: graphql.GraphQLString
+        },
+        asset: {
+          type: graphql.GraphQLString
         }
       }),
       async resolve (root, args) {
@@ -100,8 +103,18 @@ const query = new graphql.GraphQLObjectType({
             {'nep5.from':  args.address}
           ]
           delete args.address
-          const dbGlobal = await dbGlobalClient.connection()
-          return  pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+          // const dbGlobal = await dbGlobalClient.connection()
+          // return  pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+        }
+
+        // asset
+        if (args.asset) {
+           args.$or = [
+            {'vout.asset': args.asset},
+            {vin: {$elemMatch: {'utxo.asset': args.asset }}},
+            {'nep5.assetId':  args.asset},
+          ]
+          delete args.asset
         }
 
 
