@@ -157,10 +157,10 @@ const query = new graphql.GraphQLObjectType({
         // if search
         if (args.search) {
           args.$or = [
-             {assetId: new RegExp(args.search)},
-            {name: new RegExp(args.search)},
-            {type: new RegExp(args.search)},
-            {symbol:  new RegExp(args.search)}
+            {assetId: new RegExp(args.search, 'i')},
+            {'name.name': new RegExp(args.search, 'i')},
+            {type: new RegExp(args.search, 'i')},
+            {symbol:  new RegExp(args.search, 'i')}
           ]
 
           delete args.search
