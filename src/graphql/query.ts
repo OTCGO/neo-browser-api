@@ -153,7 +153,6 @@ const query = new graphql.GraphQLObjectType({
       }),
       async resolve (root, args) {
 
-
         // if search
         if (args.search) {
           args.$or = [
@@ -167,7 +166,7 @@ const query = new graphql.GraphQLObjectType({
         }
 
         const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({}, args), {})
+        return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({status: {$exists: false}}, args), {})
 
         // const dbNep5 = await dbNep5Client.connection()
         // const resultNep5: any  = await pageQuery(args.skip, 0, dbNep5.nep5_m_assets, undefined, queryBuilder({}, args), {})
