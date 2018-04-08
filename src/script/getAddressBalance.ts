@@ -36,9 +36,13 @@ async function main() {
   const cursor = await dbGlobal.address.find().sort({blockIndex: 1})
 
   cursor.on('data', async (data) => {
-    // console.log('data', data)
-   // await getBalance(data.address)
-    q.push(await getBalance(data.address))
+    try {
+      await getBalance(data.address)
+    } catch (error) {
+      console.log('error', error)
+    }
+
+    // q.push(await getBalance(data.address))
 
   })
   cursor.on('end', () => {
@@ -86,7 +90,6 @@ async function getBalance(address) {
           balances
         })
       }
-
     }
 
 
@@ -95,17 +98,19 @@ async function getBalance(address) {
 
     const asset: any = await dbGlobal.asset.find({type: 'nep5', status: {$exists: false}}).toArray()
     const arr = []
-    asset.forEach(item => {
-        arr.push(async () => {
-          const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
-          return {
-            assetId: item.assetId,
-            balances: new Decimal(`${balances || 0}`)
-          }
-        })
-    })
-    const result = await parallel(arr, 10)
 
+    asset.forEach(item => {
+      arr.push(async () => {
+        const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
+        return {
+          assetId: item.assetId,
+          name: item.symbol,
+          type: 'nep5',
+          balances: new Decimal(`${balances || 0}`)
+        }
+      })
+  })
+  const result = await parallel(arr, 10)
     globalArr.concat(result).forEach((item) => {
          // console.log('balances', item)
         if (item.balances.gt(0)) {
@@ -126,6 +131,6 @@ async function getBalance(address) {
 
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
-main()
+ main()
 
 // ZREVRANGE c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b 0 19
