@@ -37,8 +37,8 @@ async function main() {
 
   cursor.on('data', async (data) => {
     // console.log('data', data)
-
-    q.push(await getBalance(data.address))
+    await getBalance(data.address)
+   // q.push())
 
   })
   cursor.on('end', () => {
