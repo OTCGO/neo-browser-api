@@ -44,6 +44,10 @@ async function main() {
   cursor.on('end', () => {
     console.log('end')
   })
+
+  cursor.on('error', (error) => {
+    console.log('error', error)
+  })
 }
 
 
