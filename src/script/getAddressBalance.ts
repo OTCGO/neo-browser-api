@@ -27,18 +27,18 @@ const async = require('async')
 const q = async.queue(function(data, callback) {
 // fork callback
   callback()
-}, 10)
+}, 5)
 
 
 async function main() {
 
   const dbGlobal = await dbGlobalClient.connection()
-  const cursor = await dbGlobal.address.find().sort({blockIndex: -1})
+  const cursor = await dbGlobal.address.find().sort({blockIndex: 1})
 
   cursor.on('data', async (data) => {
     // console.log('data', data)
-    await getBalance(data.address)
-   // q.push())
+   // await getBalance(data.address)
+    q.push(await getBalance(data.address))
 
   })
   cursor.on('end', () => {
