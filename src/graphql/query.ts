@@ -48,13 +48,6 @@ const query = new graphql.GraphQLObjectType({
         }
       }),
       async resolve (root, args) {
-        // if (args.address) {
-        //   args.$or = [
-        //     {'address.value': args.address},
-        //     {'address.hash': args.address},
-        //   ]
-        //   delete args.address
-        // }
          const dbGlobal = await dbGlobalClient.connection()
          return  pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
       }

@@ -63,7 +63,6 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
 
 
 
-
       const obj: any = {}
       for (const item of uxtos){
         if (!obj[item.asset]) {
@@ -97,7 +96,7 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
 
 
 
-      const asset: any = await dbGlobal.asset.find({type: 'nep5'}).toArray()
+      const asset: any = await dbGlobal.asset.find({type: 'nep5', status: {$exists: false}}).toArray()
       const arr = []
       asset.forEach(item => {
           arr.push(async () => {

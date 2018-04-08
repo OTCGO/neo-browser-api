@@ -8,6 +8,13 @@ module.exports = {
   network: process.env.NETWORK,
   dbGlobal: process.env.MONGODB_URL,
   dbUtxo: process.env.MONGODB_UTXO,
+  redis: {
+    port: 6379,          // Redis port
+    host: '127.0.0.1'   // Redis host
+    // family: 4,           // 4 (IPv4) or 6 (IPv6)
+    // password: 'auth',
+    // db: 0
+  },
   log: {
     appenders: [ // 日志
       {
