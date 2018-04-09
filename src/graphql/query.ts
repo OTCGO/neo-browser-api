@@ -47,9 +47,9 @@ const query = new graphql.GraphQLObjectType({
           type: graphql.GraphQLString
         }
       }),
-      async resolve (root, args) {
-         const dbGlobal = await dbGlobalClient.connection()
-         return  pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
+      async resolve(root, args) {
+        const dbGlobal = await dbGlobalClient.connection()
+        return pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
       }
     },
     TransactionQuery: {
@@ -84,35 +84,43 @@ const query = new graphql.GraphQLObjectType({
           type: graphql.GraphQLString
         }
       }),
-      async resolve (root, args) {
+      async resolve(root, args) {
 
         // test AGwJpXGPowiJfMFAdnrdB1uV92i4ubPANA
         if (args.address) {
           // args['vout.address'] = args.address
-           args.$or = [
-            {'vout.address': args.address},
-            {vin: {$elemMatch: {'utxo.address': args.address }}},
-            {'nep5.to':  args.address},
-            {'nep5.from':  args.address}
+          args.$or = [
+            { 'vout.address': args.address },
+            { vin: { $elemMatch: { 'utxo.address': args.address } } },
+            { 'nep5.to': args.address },
+            { 'nep5.from': args.address }
           ]
           delete args.address
           // const dbGlobal = await dbGlobalClient.connection()
           // return  pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
         }
 
+        const dbGlobal = await dbGlobalClient.connection()
         // asset
         if (args.asset) {
-           args.$or = [
-            {'vout.asset': args.asset},
-            {vin: {$elemMatch: {'utxo.asset': args.asset }}},
-            {'nep5.assetId':  args.asset},
-          ]
+          const asset = await dbGlobal.asset.findOne({ assetId: args.asset })
+          if (asset.type === 'nep5') {
+            args.$or = [
+              { 'nep5.assetId': args.asset },
+            ]
+          } else {
+            args.$or = [
+              { 'vout.asset': args.asset },
+              { vin: { $elemMatch: { 'utxo.asset': args.asset } } }
+            ]
+          }
+
           delete args.asset
         }
 
 
-        const dbGlobal = await dbGlobalClient.connection()
-        return  pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+
+        return pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
       }
     },
     AssetQuery: {
@@ -144,22 +152,22 @@ const query = new graphql.GraphQLObjectType({
           type: graphql.GraphQLString
         }
       }),
-      async resolve (root, args) {
+      async resolve(root, args) {
 
         // if search
         if (args.search) {
           args.$or = [
-            {assetId: new RegExp(args.search, 'i')},
-            {'name.name': new RegExp(args.search, 'i')},
-            {type: new RegExp(args.search, 'i')},
-            {symbol:  new RegExp(args.search, 'i')}
+            { assetId: new RegExp(args.search, 'i') },
+            { 'name.name': new RegExp(args.search, 'i') },
+            { type: new RegExp(args.search, 'i') },
+            { symbol: new RegExp(args.search, 'i') }
           ]
 
           delete args.search
         }
 
         const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({status: {$exists: false}}, args), {})
+        return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({ status: { $exists: false } }, args), {})
 
         // const dbNep5 = await dbNep5Client.connection()
         // const resultNep5: any  = await pageQuery(args.skip, 0, dbNep5.nep5_m_assets, undefined, queryBuilder({}, args), {})
@@ -170,7 +178,7 @@ const query = new graphql.GraphQLObjectType({
         //   count: resultGlo.count + resultNep5.count,
         //   rows: _.union(resultGlo.rows, resultNep5.rows),
         // }
-       // return  pageQuery(args.skip, args.limit, Asset, '', queryBuilder({}, args))
+        // return  pageQuery(args.skip, args.limit, Asset, '', queryBuilder({}, args))
       }
     },
     BlockQuery: {
@@ -193,9 +201,9 @@ const query = new graphql.GraphQLObjectType({
           type: graphql.GraphQLInt
         }
       }),
-      async resolve (root, args) {
+      async resolve(root, args) {
         const dbGlobal = await dbGlobalClient.connection()
-        return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
+        return pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, {})
       }
     },
     SystemQuery: {
@@ -212,27 +220,27 @@ const query = new graphql.GraphQLObjectType({
           type: graphql.GraphQLString
         }
       }),
-      async resolve (root, args) {
+      async resolve(root, args) {
         const dbGlobal = await dbGlobalClient.connection()
 
 
-        const blockNumMinObj  = await dbGlobal.block.find({}, {index: 1, time: 1}).sort({index: 1}).limit(1).toArray()
+        const blockNumMinObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: 1 }).limit(1).toArray()
         console.log('blockNumMinObj', blockNumMinObj)
-        const blockNumMaxObj  = await dbGlobal.block.find({}, {index: 1, time: 1}).sort({index: -1}).limit(1).toArray()
+        const blockNumMaxObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: -1 }).limit(1).toArray()
         // console.log('blockNum', blockNumMaxObj)
 
         const assetNum = await dbGlobal.asset.find().count()
         // console.log('assetObj', assetNum)
 
         const addressNum = await dbGlobal.address.find().count()
-       // console.log('addressObj', addressNum)
+        // console.log('addressObj', addressNum)
 
         const transactionNum = await dbGlobal.transaction.find().count()
-       // console.log('transactionObj', transactionNum)
+        // console.log('transactionObj', transactionNum)
 
         return {
           rows: {
-            startTime:  blockNumMinObj[0].time,
+            startTime: blockNumMinObj[0].time,
             curretTime: blockNumMaxObj[0].time,
             blockNum: blockNumMaxObj[0].index + 1,
             assetNum,
@@ -240,7 +248,7 @@ const query = new graphql.GraphQLObjectType({
             transactionNum
           }
         }
-       // return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
+        // return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
       }
     },
   }
