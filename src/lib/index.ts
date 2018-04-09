@@ -9,3 +9,4 @@
 
  // export * from './db'
  export * from './dbClient'
+ export * from './redis'
