@@ -59,41 +59,6 @@ async function getBalance(address) {
 
     try {
     const dbGlobal = await dbGlobalClient.connection()
-    const dbUtxo = await dbUtxolClient.connection()
-    // console.log('address', address)
-    const uxtos = await dbUtxo.utxos.find({address, spent_height: {$exists: false}}).toArray()
-
-
-    const obj: any = {}
-    for (const item of uxtos){
-      if (!obj[item.asset]) {
-        obj[item.asset] = []
-      }
-      obj[item.asset].push({prevIndex: item.index, prevHash: item.txid, value: item.value})
-      // globalArr.push(obj)
-    }
-
-    const globalArr = []
-    for (const key in obj) {
-
-      const asset: any = await dbGlobal.asset.findOne({assetId: key})
-
-      let balances: any = 0
-      obj[key].forEach((utxo) => {
-        balances = Decimal.add(balances, utxo.value)
-      })
-
-
-      if (asset.name.length > 0) {
-        globalArr.push({
-          assetId: key,
-          balances
-        })
-      }
-    }
-
-
-
 
 
     const asset: any = await dbGlobal.asset.find({type: 'nep5', status: {$exists: false}}).toArray()
@@ -110,8 +75,8 @@ async function getBalance(address) {
         }
       })
   })
-  const result = await parallel(arr, 10)
-    globalArr.concat(result).forEach((item) => {
+  const result: any = await parallel(arr, 10)
+  result.forEach((item) => {
          // console.log('balances', item)
         if (item.balances.gt(0)) {
             // console.log('balances', item.balances)
