@@ -128,7 +128,7 @@ mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
     if (list) {
       return res.apiSuccess(JSON.parse(list))
     }
-    return res.apiSuccess(list)
+    return res.apiSuccess()
 
   } catch (error) {
     logger.error('mainnet', error)
