@@ -23,11 +23,12 @@ const dbUtxolClient: any = new DBClient(config.get('dbUtxo'))
 // value  balance
 
 
-
+let dbGlobal = undefined
+let cursor = undefined
 async function main() {
 
-  const dbGlobal = await dbGlobalClient.connection()
-  const cursor = await dbGlobal.address.find().sort({ blockIndex: 1 })
+  dbGlobal = await dbGlobalClient.connection()
+  cursor = await dbGlobal.address.find().sort({ blockIndex: 1 })
 
   // cursor.forEach(async data => {
   //   await getBalance(data.address)
@@ -57,7 +58,7 @@ function getBalance(address) {
   console.log('getBalance', address)
   return new Promise(async (resolve, reject) => {
     try {
-      const dbGlobal = await dbGlobalClient.connection()
+      dbGlobal = await dbGlobalClient.connection()
       const asset: any = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
       const arr = []
 
@@ -72,7 +73,7 @@ function getBalance(address) {
           }
         })
       })
-      const result: any = await parallel(arr, 5)
+      const result: any = await parallel(arr, 2)
       result.forEach((item) => {
         // console.log('balances', item)
         if (item.balances.gt(0)) {
@@ -88,6 +89,7 @@ function getBalance(address) {
       console.log('end', address)
       return resolve()
     } catch (error) {
+
       console.log('error', error)
       return reject()
     }
