@@ -11,10 +11,8 @@ module.exports = {
   redis: {
     port: 6379,          // Redis port
     host: process.env.REDIS_HOST   // Redis host
-    // family: 4,           // 4 (IPv4) or 6 (IPv6)
-    // password: 'auth',
-    // db: 0
   },
+  rpclist: [process.env.RPC1, process.env.RPC2, process.env.RPC3, process.env.RPC4, process.env.RPC5],
   log: {
     appenders: [ // 日志
       {

@@ -18,7 +18,7 @@ import { Request as WebHandler } from '../../utils'
 import schema from '../../graphql'
 import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
-import { DBClient } from '../../lib'
+import { DBClient, client as redis } from '../../lib'
 
 
 
@@ -118,6 +118,20 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
     }
   })
 
+
+mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
+  try {
+    const { limit, skip } = req.query
+    const { asset } = req.params
+    const list = await redis.zrevrange(asset, skip || 0, limit || 50)
+    return res.apiSuccess(list)
+
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+
+})
 export { mainnet }
 
 
