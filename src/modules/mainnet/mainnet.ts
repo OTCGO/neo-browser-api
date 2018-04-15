@@ -124,7 +124,11 @@ mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
     const { limit, skip } = req.query
     const { asset } = req.params
     const list = await redis.zrevrange(asset, skip || 0, limit || 50)
-    return res.apiSuccess(list)
+
+    if (list) {
+      return res.apiSuccess(JSON.parse(list))
+    }
+    return res.apiSuccess()
 
   } catch (error) {
     logger.error('mainnet', error)
