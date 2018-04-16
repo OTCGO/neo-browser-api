@@ -25,6 +25,7 @@ const dbUtxolClient: any = new DBClient(config.get('dbUtxo'))
 
 let dbGlobal = undefined
 let cursor = undefined
+let asset = undefined
 async function main() {
 
   dbGlobal = await dbGlobalClient.connection()
@@ -34,11 +35,20 @@ async function main() {
   //   await getBalance(data.address)
   //   console.log('data')
   // })
+
+  dbGlobal = await dbGlobalClient.connection()
+  console.log('33')
+  asset = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
+
   cursor.on('data', async (data) => {
     try {
-      getBalance(data.address)
 
-      console.log('data')
+      if (/^A/.test(data.address)) {
+        console.log('data')
+        await getBalance(data.address)
+      }
+
+
 
     } catch (error) {
       console.log('error', error)
@@ -58,10 +68,19 @@ function getBalance(address) {
   console.log('getBalance', address)
   return new Promise(async (resolve, reject) => {
     try {
-      dbGlobal = await dbGlobalClient.connection()
-      const asset: any = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
-      const arr = []
+      for (const item of asset) {
+        const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
+        if (balances) {
+          redis.zadd(`${item.assetId.substring(2)}`, balances, JSON.stringify({
+            address,
+            balances: new Decimal(`${balances || 0}`)
+          }))
+        }
+      }
 
+      return resolve()
+      /*
+      const arr = []
       asset.forEach(item => {
         arr.push(async () => {
           const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
@@ -83,14 +102,14 @@ function getBalance(address) {
             balances: item.balances
           }))
         }
-
       })
 
       console.log('end', address)
       return resolve()
+      */
     } catch (error) {
 
-      console.log('error', error)
+      // console.log('error', error)
       return reject()
     }
   })
@@ -99,7 +118,7 @@ function getBalance(address) {
 async function getNode() {
   const arr: any[] = config.get('rpclist') || []
   const node = arr[Math.floor(Math.random() * arr.length)]
-  // console.log('node', node)
+  console.log('node', node)
   return node
 }
 

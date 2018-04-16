@@ -229,7 +229,7 @@ const query = new graphql.GraphQLObjectType({
         const blockNumMaxObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: -1 }).limit(1).toArray()
         // console.log('blockNum', blockNumMaxObj)
 
-        const assetNum = await dbGlobal.asset.find().count()
+        const assetNum = await dbGlobal.asset.find({status: { $exists: false }}).count()
         // console.log('assetObj', assetNum)
 
         const addressNum = await dbGlobal.address.find().count()
