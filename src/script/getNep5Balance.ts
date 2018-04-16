@@ -23,21 +23,30 @@ const dbUtxolClient: any = new DBClient(config.get('dbUtxo'))
 // value  balance
 
 
-
+let dbGlobal = undefined
+let cursor = undefined
+let asset = undefined
 async function main() {
 
-  const dbGlobal = await dbGlobalClient.connection()
-  const cursor = await dbGlobal.address.find().sort({ blockIndex: 1 })
+  dbGlobal = await dbGlobalClient.connection()
+  cursor = await dbGlobal.address.find().sort({ blockIndex: 1 })
 
   // cursor.forEach(async data => {
   //   await getBalance(data.address)
   //   console.log('data')
   // })
+
+  dbGlobal = await dbGlobalClient.connection()
+  console.log('33')
+  asset = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
+
   cursor.on('data', async (data) => {
     try {
-      getBalance(data.address)
 
-      console.log('data')
+      if (/^A/.test(data.address)) {
+        console.log('data')
+        await getBalance(data.address)
+      }
 
     } catch (error) {
       console.log('error', error)
@@ -57,10 +66,19 @@ function getBalance(address) {
   console.log('getBalance', address)
   return new Promise(async (resolve, reject) => {
     try {
-      const dbGlobal = await dbGlobalClient.connection()
-      const asset: any = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
-      const arr = []
+      for (const item of asset) {
+        const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
+        if (balances) {
+          redis.zadd(`${item.assetId.substring(2)}`, balances, JSON.stringify({
+            address,
+            balances: new Decimal(`${balances || 0}`)
+          }))
+        }
+      }
 
+      return resolve()
+      /*
+      const arr = []
       asset.forEach(item => {
         arr.push(async () => {
           const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
@@ -72,7 +90,7 @@ function getBalance(address) {
           }
         })
       })
-      const result: any = await parallel(arr, 5)
+      const result: any = await parallel(arr, 2)
       result.forEach((item) => {
         // console.log('balances', item)
         if (item.balances.gt(0)) {
@@ -82,13 +100,14 @@ function getBalance(address) {
             balances: item.balances
           }))
         }
-
       })
 
       console.log('end', address)
       return resolve()
+      */
     } catch (error) {
-      console.log('error', error)
+
+      // console.log('error', error)
       return reject()
     }
   })
@@ -97,7 +116,7 @@ function getBalance(address) {
 async function getNode() {
   const arr: any[] = config.get('rpclist') || []
   const node = arr[Math.floor(Math.random() * arr.length)]
-  // console.log('node', node)
+  console.log('node', node)
   return node
 }
 
