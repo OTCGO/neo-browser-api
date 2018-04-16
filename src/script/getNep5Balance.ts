@@ -48,8 +48,6 @@ async function main() {
         await getBalance(data.address)
       }
 
-
-
     } catch (error) {
       console.log('error', error)
     }

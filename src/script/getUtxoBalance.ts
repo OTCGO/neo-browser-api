@@ -9,6 +9,7 @@ import { Request as WebHandler } from '../utils'
 import { api } from '@cityofzion/neon-js'
 import { parallel } from '../utils/index'
 import { DBClient, client as redis } from '../lib'
+import * as schedule from 'node-schedule'
 
 
 
@@ -103,6 +104,10 @@ async function getBalance(address) {
 
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
-main()
+// main()
 
+// 每天一点钟
+schedule.scheduleJob('0 0 1 * * *', () => {
+  main()
+})
 // ZREVRANGE c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b 0 19
