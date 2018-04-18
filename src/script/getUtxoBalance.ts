@@ -23,21 +23,22 @@ const dbUtxolClient: any = new DBClient(config.get('dbUtxo'))
 // score  balance
 // value  balance
 
-const async = require('async')
+// const async = require('async')
 
-const q = async.queue(function (data, callback) {
-  // fork callback
-  callback()
-}, 5)
+// const q = async.queue(function (data, callback) {
+//   // fork callback
+//   callback()
+// }, 5)
 
-
+let dbGlobal = undefined
 async function main() {
 
-  const dbGlobal = await dbGlobalClient.connection()
+  dbGlobal = await dbGlobalClient.connection()
   const cursor = await dbGlobal.address.find().sort({ blockIndex: 1 })
 
   cursor.on('data', async (data) => {
     try {
+      console.log('data', data.address)
       await getBalance(data.address)
     } catch (error) {
       console.log('error', error)
@@ -59,7 +60,7 @@ async function main() {
 async function getBalance(address) {
 
   try {
-    const dbGlobal = await dbGlobalClient.connection()
+    dbGlobal = await dbGlobalClient.connection()
     const dbUtxo = await dbUtxolClient.connection()
     // console.log('address', address)
     const uxtos = await dbUtxo.utxos.find({ address, spent_height: { $exists: false } }).toArray()
@@ -88,13 +89,11 @@ async function getBalance(address) {
       if (asset.name.length > 0) {
         if (balances.gt(0)) {
           // console.log('balances', item.balances)
-          redis.zadd(`${key.substring(2)}`, balances, JSON.stringify({
-            address,
-            balances
-          }))
+          redis.zadd(`${key.substring(2)}`, balances, address)
         }
       }
     }
+    // , 'EX', parseInt(config.get('cache.redisEx')) * 60
 
     console.log('end', address)
   } catch (error) {
@@ -102,12 +101,21 @@ async function getBalance(address) {
   }
 }
 
+
+// del key
+async function delKey() {
+  const asset: any = await dbGlobal.asset.find({}).toArray()
+  for (const item of asset) {
+    redis.del(`${item.assetId.substring(2)}`)
+  }
+}
+
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
-// main()
+main()
 
-// 每天一点钟
-schedule.scheduleJob('0 0 1 * * *', () => {
-  main()
-})
-// ZREVRANGE c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b 0 19
+// 每天一点
+// schedule.scheduleJob('0 0 1 * * *', () => {
+//   main()
+// })
+// zRange 0c092117b4ba47b81001712425e6e7f760a637695eaf23741ba335925b195ecd 0 19
