@@ -124,7 +124,7 @@ mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
     const { start, end } = req.query
     const { asset } = req.params
     const count = await redis.zcard(asset)
-    const list = await redis.zrevrange(asset, start || 0, end || 50)
+    const list = await redis.zrevrange(asset, start || 0, end || 20, 'WITHSCORES')
 
     return res.apiSuccess({
       count,
