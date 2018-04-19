@@ -40,7 +40,9 @@ async function main() {
 
       if (/^A/.test(data.address)) {
         console.log('data')
-        await getBalance(data.address)
+        q.push(data.address)
+
+        // await getBalance(data.address)
       }
 
     } catch (error) {
@@ -54,19 +56,20 @@ async function main() {
   cursor.on('error', (error) => {
     console.log('error', error)
   })
+
 }
 
 
 const q = async.queue(async (data, callback) => {
   try {
-    const { item, address } = data
-    // console.log('item', item)
-    // console.log('address', address)
-    // fork callback
-    const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
-    // console.log('balances', balances)
-    if (balances) {
-      await redis.zadd(`${item.assetId.substring(2)}`, balances, address)
+    const address = data
+    for (const item of asset) {
+      // fork callback
+      const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
+      console.log('balances', balances)
+      if (balances) {
+        await redis.zadd(`${item.assetId.substring(2)}`, balances, address)
+      }
     }
     callback()
   } catch (error) {
@@ -76,7 +79,7 @@ const q = async.queue(async (data, callback) => {
 
 
 }, 10)
-
+/*
 function getBalance(address) {
   console.log('getBalance', address)
   return new Promise(async (resolve, reject) => {
@@ -101,6 +104,7 @@ function getBalance(address) {
   })
 }
 
+*/
 async function getNode() {
   const arr: any[] = config.get('rpclist') || []
   const node = arr[Math.floor(Math.random() * arr.length)]
