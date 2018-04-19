@@ -39,7 +39,7 @@ async function main() {
     try {
 
       if (/^A/.test(data.address)) {
-        console.log('data')
+        console.log('data', data.address)
         q.push(data.address)
 
         // await getBalance(data.address)
