@@ -115,7 +115,7 @@ async function delKey() {
 main()
 
 // 每天一点
-// schedule.scheduleJob('0 0 1 * * *', () => {
-//   main()
-// })
+schedule.scheduleJob('0 0 1 * * *', () => {
+  main()
+})
 // zRange 30e9636bc249f288139651d60f67c110c3ca4c3dd30ddfa3cbcec7bb13f14fd4 0 19
