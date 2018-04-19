@@ -102,14 +102,6 @@ async function getBalance(address) {
 }
 
 
-// del key
-async function delKey() {
-  const asset: any = await dbGlobal.asset.find({}).toArray()
-  for (const item of asset) {
-    redis.del(`${item.assetId.substring(2)}`)
-  }
-}
-
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
 main()
