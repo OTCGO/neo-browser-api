@@ -67,9 +67,10 @@ const q = async.queue(async (data, callback) => {
     // console.log('balances', balances)
     if (balances) {
       await redis.zadd(`${item.assetId.substring(2)}`, balances, address)
-      callback()
     }
+    callback()
   } catch (error) {
+    callback()
     console.log('error', error)
   }
 
@@ -115,5 +116,5 @@ main()
 // schedule.scheduleJob('0 0 5 * * 2', () => {
 //   main()
 // })
-// ZREVRANGE c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b 0 19
+// ZREVRANGE ceab719b8baa2310f232ee0d277c061704541cfb 0 19
 
