@@ -56,6 +56,7 @@ async function main() {
   cursor.on('error', (error) => {
     console.log('error', error)
   })
+
 }
 
 
@@ -63,18 +64,14 @@ const q = async.queue(async (data, callback) => {
   try {
     const address = data
     for (const item of asset) {
-
-      // console.log('item', item)
-      console.log('address', address)
       // fork callback
       const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
       console.log('balances', balances)
       if (balances) {
         await redis.zadd(`${item.assetId.substring(2)}`, balances, address)
       }
-      callback()
     }
-
+    callback()
   } catch (error) {
     callback()
     console.log('error', error)
