@@ -68,7 +68,7 @@ const q = async.queue(async (data, callback) => {
       const balances = await api.nep5.getTokenBalance(await getNode(), item.assetId.substring(2), address)
       console.log('balances', balances)
       if (balances) {
-        await redis.zadd(`${item.assetId.substring(2)}`, balances, address)
+        await redis.zadd(`${item.assetId.substring(2)}`, new Decimal(balances || 0), address)
       }
     }
     callback()
@@ -120,5 +120,5 @@ main()
 schedule.scheduleJob('0 0 5 * * 2', () => {
   main()
 })
-// ZREVRANGE ceab719b8baa2310f232ee0d277c061704541cfb 0 19
+// ZREVRANGE acbc532904b6b51b5ea6d19b803d78af70e7e6f9 0 19 WITHSCORES
 
