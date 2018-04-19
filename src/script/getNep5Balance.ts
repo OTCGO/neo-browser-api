@@ -117,8 +117,8 @@ async function getNode() {
 main()
 
 // 每周二5点
-// schedule.scheduleJob('0 0 5 * * 2', () => {
-//   main()
-// })
+schedule.scheduleJob('0 0 5 * * 2', () => {
+  main()
+})
 // ZREVRANGE ceab719b8baa2310f232ee0d277c061704541cfb 0 19
 
