@@ -114,7 +114,7 @@ async function getNode() {
 
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
-main()
+// main()
 
 // 每周二5点
 schedule.scheduleJob('0 0 5 * * 2', () => {
