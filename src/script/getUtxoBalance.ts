@@ -56,7 +56,7 @@ async function main() {
   })
 }
 
-
+const assetObj = {}
 async function getBalance(address) {
 
   try {
@@ -77,21 +77,19 @@ async function getBalance(address) {
 
     const globalArr = []
     for (const key in obj) {
-
-      const asset: any = await dbGlobal.asset.findOne({ assetId: key })
+      // const asset: any = await dbGlobal.asset.findOne({ assetId: key })
+      //
 
       let balances: any = 0
       obj[key].forEach((utxo) => {
         balances = Decimal.add(balances, utxo.value)
       })
 
-
-      if (asset.name.length > 0) {
-        if (balances.gt(0)) {
-          // console.log('balances', item.balances)
-          redis.zadd(`${key.substring(2)}`, balances, address)
-        }
+      if (balances.gt(0)) {
+        // console.log('balances', item.balances)
+        redis.zadd(`${key.substring(2)}`, balances, address)
       }
+
     }
     // , 'EX', parseInt(config.get('cache.redisEx')) * 60
 
