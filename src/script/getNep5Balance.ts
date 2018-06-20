@@ -78,7 +78,7 @@ const q = async.queue(async (data, callback) => {
   }
 
 
-}, 10)
+}, 3)
 /*
 function getBalance(address) {
   console.log('getBalance', address)
