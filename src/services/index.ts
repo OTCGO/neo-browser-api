@@ -8,3 +8,4 @@
  */
 
 export * from './block'
+export * from './ont'

@@ -20,6 +20,7 @@ import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
 import { DBClient, client as redis } from '../../lib'
 
+import { getOntBalance } from '../../services'
 
 
 const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
@@ -109,7 +110,33 @@ mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
             }
           })
       })
-      const result = await parallel(arr, 10)
+      const result: any = await parallel(arr, 10)
+
+      const ontResult = await getOntBalance(address)
+
+      const ONT_HASH = '0000000000000000000000000000000000000001'
+      const ONG_HASH = '0000000000000000000000000000000000000002'
+
+
+      // ONT_HASH
+      result.push({
+          assetId: ONT_HASH,
+          name: 'ontology-ONT',
+          type: 'ont',
+          balances: `${ontResult[ONT_HASH] || 0}`
+        }
+      )
+
+      // ONG_HASH
+      result.push({
+        assetId: ONG_HASH,
+        name: 'ontology-ONG',
+        type: 'ont',
+        balances: `${ontResult[ONG_HASH] || 0}`
+      }
+    )
+
+
       return res.apiSuccess(globalArr.concat(result))
 
     } catch (error) {
