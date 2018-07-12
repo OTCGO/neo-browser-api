@@ -4,13 +4,14 @@ module.exports = {
     port: '5001', // port
     apiPrefix: '/api/v1' // api 前缀
   },
+  neoAPI: process.env.NEOAPI,
   rpc: process.env.RPC,
   network: process.env.NETWORK,
   dbGlobal: process.env.MONGODB_URL,
   dbUtxo: process.env.MONGODB_UTXO,
   redis: {
-    port: 6379,          // Redis port
-    host: process.env.REDIS_HOST   // Redis host
+    port: 6379, // Redis port
+    host: process.env.REDIS_HOST // Redis host
   },
   cache: {
     redisEx: process.env.REDIS_EX
