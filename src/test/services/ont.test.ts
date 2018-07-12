@@ -12,12 +12,12 @@ async function main() {
     try {
 
 
-        const ontResult: any = await getOntBalance('AZ2FJDreaBA9v4YzxsNPnkcvir1Jh3SdoG')
+        const ontResult: any = await getOntBalance('AGwJpXGPowiJfMFAdnrdB1uV92i4ubPANA')
 
 
         // console.log('ontResult', typeof ontResult)
         // console.log('ontResult', ontResult._id)
-        // console.log('ontResult', ontResult.balances)
+       // console.log('ontResult', ontResult.balances)
         const result = []
         // ONT_HASH
         result.push({
