@@ -12,7 +12,7 @@ async function main() {
     try {
 
 
-        const ontResult: any = await getOntBalance('AGwJpXGPowiJfMFAdnrdB1uV92i4ubPANA')
+        const ontResult: any = await getOntBalance('AZ2FJDreaBA9v4YzxsNPnkcvir1Jh3SdoG')
 
 
         // console.log('ontResult', typeof ontResult)
