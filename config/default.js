@@ -11,7 +11,7 @@ module.exports = {
   dbUtxo: process.env.MONGODB_UTXO,
   redis: {
     port: 6379, // Redis port
-    host: process.env.REDIS_HOST // Redis host
+    host: process.env.REDIS_HOST // Redis host,
   },
   cache: {
     redisEx: process.env.REDIS_EX

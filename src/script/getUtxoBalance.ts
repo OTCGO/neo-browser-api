@@ -88,6 +88,7 @@ async function getBalance(address) {
       if (balances.gt(0)) {
         // console.log('balances', item.balances)
         redis.zadd(`${key.substring(2)}`, balances, address)
+        redis.expire(`${key.substring(2)}`, parseInt(config.get('cache.redisEx')) * 60)
       }
 
     }
