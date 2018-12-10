@@ -11,7 +11,9 @@ module.exports = {
         'NODE_ENV': 'production'
       },
       'instances': 'max',   // 如果是fork, 不用配置
-      'exec_mode': 'cluster'  // cluster or fork
+      'exec_mode': 'cluster',  // cluster or fork,
+      "out_file": "/dev/null",
+      "error_file": "/dev/null"
     }
   ]
 }
