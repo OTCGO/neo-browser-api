@@ -18,10 +18,9 @@ const getOntBalance = async (address) => {
             return resolve(JSON.parse(body).balances)
         })
     })
-
-
-
 }
+
+
 
 
 
