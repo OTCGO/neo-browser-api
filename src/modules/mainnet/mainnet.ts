@@ -20,7 +20,10 @@ import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
 import { DBClient, client as redis } from '../../lib'
 
-import { getOntBalance } from '../../services'
+import { getOntBalance, getAccountState } from '../../services'
+
+import gb from '../../constant/global'
+
 
 
 const dbGlobalClient: any = new DBClient(config.get('dbGlobal'))
@@ -33,7 +36,7 @@ mainnet.use(`/public/graphql`, graphqlHTTP({
   schema,
   graphiql: true,
   pretty: true,
-  extensions ({
+  extensions({
     documet,
     variables,
     operationName,
@@ -53,100 +56,118 @@ mainnet.use(`/public/graphql`, graphqlHTTP({
 }))
 
 
-mainnet.get(`/address/balances/:address`,  async (req: NRequest, res: any)  => {
-     try {
-      const { address } = req.params
+mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
+  try {
+    const { address } = req.params
+
+    const dbGlobal = await dbGlobalClient.connection()
 
 
-      const dbGlobal = await dbGlobalClient.connection()
-      const dbUtxo = await dbUtxolClient.connection()
-      const uxtos = await dbUtxo.utxos.find({address, spent_height: {$exists: false}}).toArray()
+    /*
+    const dbGlobal = await dbGlobalClient.connection()
+    const dbUtxo = await dbUtxolClient.connection()
+    const uxtos = await dbUtxo.utxos.find({address, spent_height: {$exists: false}}).toArray()
 
 
 
-      const obj: any = {}
-      for (const item of uxtos){
-        if (!obj[item.asset]) {
-          obj[item.asset] = []
-        }
-        obj[item.asset].push({prevIndex: item.index, prevHash: item.txid, value: item.value})
-        // globalArr.push(obj)
+    const obj: any = {}
+    for (const item of uxtos){
+      if (!obj[item.asset]) {
+        obj[item.asset] = []
       }
+      obj[item.asset].push({prevIndex: item.index, prevHash: item.txid, value: item.value})
+      // globalArr.push(obj)
+    }
 
-      const globalArr = []
-      for (const key in obj) {
+    const globalArr = []
+    for (const key in obj) {
 
-        const asset: any = await dbGlobal.asset.findOne({assetId: key})
+      const asset: any = await dbGlobal.asset.findOne({assetId: key})
 
-        let balances: any = 0
-        obj[key].forEach((utxo) => {
-          balances = Decimal.add(balances, utxo.value)
-        })
-        if (asset.name.length > 0) {
-          globalArr.push({
-            assetId: key,
-            name: asset.name[0].name,
-            type: asset.type,
-            balances
-          })
-        }
-
-      }
-
-
-
-
-
-      const asset: any = await dbGlobal.asset.find({type: 'nep5', status: {$exists: false}}).toArray()
-      const arr = []
-      asset.forEach(item => {
-          arr.push(async () => {
-            const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
-            return {
-              assetId: item.assetId,
-              name: item.symbol,
-              type: 'nep5',
-              balances: `${balances || 0}`
-            }
-          })
+      let balances: any = 0
+      obj[key].forEach((utxo) => {
+        balances = Decimal.add(balances, utxo.value)
       })
-      const result: any = await parallel(arr, 10)
-
-      const ontResult = await getOntBalance(address)
-
-      const ONT_HASH = '0000000000000000000000000000000000000001'
-      const ONG_HASH = '0000000000000000000000000000000000000002'
-
-
-      // ONT_HASH
-      result.push({
-          assetId: ONT_HASH,
-          name: 'ontology-ONT',
-          type: 'ont',
-          balances: `${ontResult[ONT_HASH] || 0}`
-        }
-      )
-
-      // ONG_HASH
-      result.push({
-        assetId: ONG_HASH,
-        name: 'ontology-ONG',
-        type: 'ont',
-        balances: `${ontResult[ONG_HASH] || 0}`
+      if (asset.name.length > 0) {
+        globalArr.push({
+          assetId: key,
+          name: asset.name[0].name,
+          type: asset.type,
+          balances
+        })
       }
+
+    }
+
+    */
+
+    const globalArr = []
+
+
+
+    const neoResult: any = await getAccountState(address)
+
+    neoResult.result.balances.forEach(element => {
+      globalArr.push({
+        assetId: element.asset,
+        name: gb[element.asset],
+        type: 'Global',
+        balances: `${element.value || 0}`
+      })
+    });
+
+
+
+    const asset: any = await dbGlobal.asset.find({ type: 'nep5', status: { $exists: false } }).toArray()
+    const arr = []
+    asset.forEach(item => {
+      arr.push(async () => {
+        const balances = await api.nep5.getTokenBalance(config.get('rpc'), item.assetId.substring(2), address)
+        return {
+          assetId: item.assetId,
+          name: item.symbol,
+          type: 'nep5',
+          balances: `${balances || 0}`
+        }
+      })
+    })
+    const result: any = await parallel(arr, 10)
+
+    const ontResult = await getOntBalance(address)
+
+    const ONT_HASH = '0000000000000000000000000000000000000001'
+    const ONG_HASH = '0000000000000000000000000000000000000002'
+
+
+    // ONT_HASH
+    result.push({
+      assetId: ONT_HASH,
+      name: 'ontology-ONT',
+      type: 'ont',
+      balances: `${ontResult[ONT_HASH] || 0}`
+    }
+    )
+
+    // ONG_HASH
+    result.push({
+      assetId: ONG_HASH,
+      name: 'ontology-ONG',
+      type: 'ont',
+      balances: `${ontResult[ONG_HASH] || 0}`
+    }
     )
 
 
-      return res.apiSuccess(globalArr.concat(result))
+    return res.apiSuccess(globalArr.concat(result))
 
-    } catch (error) {
-      logger.error('mainnet', error)
-      return res.apiError(error)
-    }
-  })
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+})
 
 
-mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
+mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
   try {
     const { start, end } = req.query
     const { asset } = req.params
@@ -155,7 +176,7 @@ mainnet.get(`/asset/transaction/:asset`,  async (req: NRequest, res: any)  => {
     const list = await redis.zrevrange(asset, start || 0, end || 20, 'WITHSCORES')
 
     return res.apiSuccess({
-      count:   count > 500 ? 500 : count  ,
+      count: count > 500 ? 500 : count,
       list
     })
   } catch (error) {
