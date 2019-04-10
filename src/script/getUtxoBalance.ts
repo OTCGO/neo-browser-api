@@ -101,12 +101,14 @@ async function getBalance(address) {
 }
 
 
+redis.zadd(`1111`, "0.33333333", "address")
+
 // AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9
 // getBalance('AUkVH4k8gPowAEpvQVAmNEkriX96CrKzk9')
-main()
+// main()
 
-// 每天一点
-schedule.scheduleJob('0 0 1 * * 1', () => {
-  main()
-})
+// // 每天一点
+// schedule.scheduleJob('0 0 1 * * 1', () => {
+//   main()
+// })
 // zRange 30e9636bc249f288139651d60f67c110c3ca4c3dd30ddfa3cbcec7bb13f14fd4 0 19
