@@ -14,16 +14,6 @@ module.exports = {
       'exec_mode': 'cluster',  // cluster or fork,
       "out_file": "/dev/null",
       "error_file": "/dev/null"
-    },
-    {
-      name: 'UtxoBalance',
-      script: './dist/script/getUtxoBalance.js',
-      env: {   // all environment
-        'NODE_ENV': 'production'
-      },
-      'exec_mode': 'fork',  // cluster or fork,
-      "out_file": "/dev/null",
-      "error_file": "/dev/null"
     }
   ]
 }
