@@ -171,14 +171,31 @@ mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
   try {
     const { start, end } = req.query
     const { asset } = req.params
-    const count = await redis.zcard(asset)
 
-    const list = await redis.zrevrange(asset, start || 0, end || 20, 'WITHSCORES')
+    // console.log('start',start)
+    // console.log('end',end)
 
+    const dbGlobal = await dbGlobalClient.connection()
+
+    const list = await dbGlobal.balance.find({ assetId: asset }).skip(parseInt(start)).limit(parseInt(end)).sort({ balance: -1 }).toArray()
+
+    const count = await dbGlobal.balance.find({ assetId: asset }).count()
+
+
+    // console.log('list',list)
     return res.apiSuccess({
       count: count > 500 ? 500 : count,
       list
     })
+
+    // const count = await redis.zcard(asset)
+
+    // const list = await redis.zrevrange(asset, start || 0, end || 20, 'WITHSCORES')
+
+    // return res.apiSuccess({
+    //   count: count > 500 ? 500 : count,
+    //   list
+    // })
   } catch (error) {
     logger.error('mainnet', error)
     return res.apiError(error)
