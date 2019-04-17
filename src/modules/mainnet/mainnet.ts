@@ -60,6 +60,15 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
   try {
     const { address } = req.params
 
+    const cache = await redis.get(`AddressBanlance:${address}`)
+
+    if (cache) {
+      console.log('cache')
+      return res.apiSuccess(JSON.parse(cache))
+    }
+
+    
+
     const dbGlobal = await dbGlobalClient.connection()
 
 
@@ -157,8 +166,12 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
     }
     )
 
+    const balance = globalArr.concat(result)
+    redis.set(`AddressBanlance:${address}`, JSON.stringify(balance), 'EX', 10) // 10s
 
-    return res.apiSuccess(globalArr.concat(result))
+    return res.apiSuccess(balance)
+
+    // return res.apiSuccess(globalArr.concat(result))
 
   } catch (error) {
     logger.error('mainnet', error)
