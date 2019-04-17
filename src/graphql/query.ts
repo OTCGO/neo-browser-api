@@ -14,7 +14,7 @@ import * as async from 'async'
 import { address, transaction, asset, block, system } from './models'
 // import { Address, Transaction, Asset } from '../models'
 import { queryBuilder, argsBuilder, pageQuery } from '../utils'
-import { DBClient } from '../lib'
+import { DBClient, client as redis } from '../lib'
 
 
 
@@ -48,8 +48,29 @@ const query = new graphql.GraphQLObjectType({
         }
       }),
       async resolve(root, args) {
-        const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
+
+        try {
+
+
+          const cache = await redis.get(`AddressQuery:${JSON.stringify(args)}`)
+
+          if (cache) {
+            console.log('cache')
+            return JSON.parse(cache)
+          }
+
+          const dbGlobal = await dbGlobalClient.connection()
+          const result = await pageQuery(args.skip, args.limit, dbGlobal.address, undefined, queryBuilder({}, args), { blockIndex: -1 })
+
+
+          redis.set(`AddressQuery:${JSON.stringify(args)}`, JSON.stringify(result), 'EX', 10) // 10s
+
+          return result
+
+        } catch (error) {
+          console.log('AddressQuery', error)
+        }
+
       }
     },
     TransactionQuery: {
@@ -119,8 +140,28 @@ const query = new graphql.GraphQLObjectType({
         }
 
 
+        try {
+          const cache = await redis.get(`TransactionQuery:${JSON.stringify(args)}`)
+          if (cache) {
+            console.log('cache get')
+            return JSON.parse(cache)
+          }
 
-        return pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+
+          // console.log('database get')
+          const result = await pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+          await redis.set(`TransactionQuery:${JSON.stringify(args)}`, JSON.stringify(result), 'EX', 10) // 10s
+          // console.log('database get',JSON.stringify(args))
+          return result
+
+        } catch (error) {
+          console.log('TransactionQuery', error)
+        }
+
+
+
+        // return pageQuery(args.skip, args.limit, dbGlobal.transaction, undefined, queryBuilder({}, args), { blockIndex: -1 })
+
       }
     },
     AssetQuery: {
@@ -167,7 +208,26 @@ const query = new graphql.GraphQLObjectType({
         }
 
         const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({ status: { $exists: false } }, args), {})
+
+        try {
+          const cache = await redis.get(`AssetQuery:${JSON.stringify(args)}`)
+          if (cache) {
+            console.log('cache get')
+            return JSON.parse(cache)
+          }
+
+
+          // console.log('database get')
+          const result = await pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({ status: { $exists: false } }, args), {})
+          await redis.set(`AssetQuery:${JSON.stringify(args)}`, JSON.stringify(result), 'EX', 60 * 60) // 1 min
+          // console.log('database get',JSON.stringify(args))
+          return result
+
+        } catch (error) {
+          console.log('AssetQuery', error)
+        }
+
+        // return pageQuery(args.skip, args.limit, dbGlobal.asset, undefined, queryBuilder({ status: { $exists: false } }, args), {})
 
         // const dbNep5 = await dbNep5Client.connection()
         // const resultNep5: any  = await pageQuery(args.skip, 0, dbNep5.nep5_m_assets, undefined, queryBuilder({}, args), {})
@@ -202,8 +262,28 @@ const query = new graphql.GraphQLObjectType({
         }
       }),
       async resolve(root, args) {
-        const dbGlobal = await dbGlobalClient.connection()
-        return pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, {})
+
+        try {
+          const cache = await redis.get(`BlockQuery:${JSON.stringify(args)}`)
+          if (cache) {
+            console.log('cache get')
+            return JSON.parse(cache)
+          }
+
+
+          // console.log('database get')
+          const dbGlobal = await dbGlobalClient.connection()
+          const result = await pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, {})
+          await redis.set(`BlockQuery:${JSON.stringify(args)}`, JSON.stringify(result), 'EX', 10) // 10s
+          // console.log('database get',JSON.stringify(args))
+          return result
+
+        } catch (error) {
+          console.log('BlockQuery', error)
+        }
+
+
+        // return pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, {})
       }
     },
     SystemQuery: {
@@ -221,32 +301,68 @@ const query = new graphql.GraphQLObjectType({
         }
       }),
       async resolve(root, args) {
-        const dbGlobal = await dbGlobalClient.connection()
 
-
-        const blockNumMinObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: 1 }).limit(1).toArray()
-        console.log('blockNumMinObj', blockNumMinObj)
-        const blockNumMaxObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: -1 }).limit(1).toArray()
-        // console.log('blockNum', blockNumMaxObj)
-
-        const assetNum = await dbGlobal.asset.find({status: { $exists: false }}).count()
-        // console.log('assetObj', assetNum)
-
-        const addressNum = await dbGlobal.address.find().count()
-        // console.log('addressObj', addressNum)
-
-        const transactionNum = await dbGlobal.transaction.find().count()
-        // console.log('transactionObj', transactionNum)
-
-        return {
-          rows: {
-            startTime: blockNumMinObj[0].time,
-            curretTime: blockNumMaxObj[0].time,
-            blockNum: blockNumMaxObj[0].index + 1,
-            assetNum,
-            addressNum,
-            transactionNum
+        try {
+          const cache = await redis.get(`SystemQuery`)
+          if (cache) {
+            console.log('cache get')
+            return JSON.parse(cache)
           }
+
+
+          // console.log('database get')
+          // const dbGlobal = await dbGlobalClient.connection()
+          // const result = await pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, {})
+          // // await redis.set(`BlockQuery:${JSON.stringify(args)}`, JSON.stringify(result), 'EX', 60 * 60) // 10s
+          // // console.log('database get',JSON.stringify(args))
+          // return result
+
+
+
+
+
+          const dbGlobal = await dbGlobalClient.connection()
+          const blockNumMinObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: 1 }).limit(1).toArray()
+          // console.log('blockNumMinObj', blockNumMinObj)
+          const blockNumMaxObj = await dbGlobal.block.find({}, { index: 1, time: 1 }).sort({ index: -1 }).limit(1).toArray()
+          // console.log('blockNum', blockNumMaxObj)
+
+          const assetNum = await dbGlobal.asset.find({ status: { $exists: false } }).count()
+          // console.log('assetObj', assetNum)
+
+          const addressNum = await dbGlobal.address.find().count()
+          // console.log('addressObj', addressNum)
+
+          const transactionNum = await dbGlobal.transaction.find().count()
+          // console.log('transactionObj', transactionNum)
+
+
+          const result = {
+            rows: {
+              startTime: blockNumMinObj[0].time,
+              curretTime: blockNumMaxObj[0].time,
+              blockNum: blockNumMaxObj[0].index + 1,
+              assetNum,
+              addressNum,
+              transactionNum
+            }
+          }
+          await redis.set(`SystemQuery`, JSON.stringify(result), 'EX', 10) // 10s
+          // console.log('database get',JSON.stringify(args))
+          return result
+          // return {
+          //   rows: {
+          //     startTime: blockNumMinObj[0].time,
+          //     curretTime: blockNumMaxObj[0].time,
+          //     blockNum: blockNumMaxObj[0].index + 1,
+          //     assetNum,
+          //     addressNum,
+          //     transactionNum
+          //   }
+          // }
+
+        } catch (error) {
+          console.log('SystemQuery', error)
         }
         // return  pageQuery(args.skip, args.limit, dbGlobal.block, undefined, queryBuilder({}, args), { index: -1 }, { })
       }
