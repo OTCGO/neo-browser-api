@@ -10,9 +10,14 @@ import { object } from 'joi'
  */
 
 const queryBuilder = (query, args) => {
-    delete args.skip
-    delete args.limit
-    return  {...query, ...args}
+    // delete args.skip
+    // delete args.limit
+
+    const tem = Object.create(args)
+    delete tem.skip
+    delete tem.limit
+
+    return  {...query, ...tem}
   }
 
   export { queryBuilder }
