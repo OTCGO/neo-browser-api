@@ -58,6 +58,19 @@ const transaction = new graphql.GraphQLObjectType({
     net_fee: {
       type: graphql.GraphQLString
     },
+    attributes:{
+      type: new graphql.GraphQLList(new graphql.GraphQLObjectType({
+        name: 'attributes',
+        fields: {
+          usage: {
+             type: graphql.GraphQLString
+           },
+           data: {
+             type: graphql.GraphQLString
+           }
+        }
+      }))
+    },
     scripts: {
       type: new graphql.GraphQLList(new graphql.GraphQLObjectType({
         name: 'scripts',
