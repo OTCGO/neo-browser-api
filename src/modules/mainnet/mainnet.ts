@@ -67,7 +67,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
       return res.apiSuccess(JSON.parse(cache))
     }
 
-    
+
 
     const dbGlobal = await dbGlobalClient.connection()
 
@@ -144,6 +144,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
 
     const ontResult = await getOntBalance(address)
 
+    
     const ONT_HASH = '0000000000000000000000000000000000000001'
     const ONG_HASH = '0000000000000000000000000000000000000002'
 
@@ -165,6 +166,8 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
       balances: `${ontResult[ONG_HASH] || 0}`
     }
     )
+
+    
 
     const balance = globalArr.concat(result)
     redis.set(`AddressBanlance:${address}`, JSON.stringify(balance), 'EX', 10) // 10s
