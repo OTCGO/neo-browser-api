@@ -20,7 +20,7 @@ import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
 import { DBClient, client as redis } from '../../lib'
 
-import { getOntBalance, getAccountState } from '../../services'
+import { getOntBalance, getAccountState, getCoinInfo, getCoinHistory } from '../../services'
 
 import gb from '../../constant/global'
 
@@ -144,7 +144,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
 
     const ontResult = await getOntBalance(address)
 
-    
+
     const ONT_HASH = '0000000000000000000000000000000000000001'
     const ONG_HASH = '0000000000000000000000000000000000000002'
 
@@ -167,7 +167,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
     }
     )
 
-    
+
 
     const balance = globalArr.concat(result)
     redis.set(`AddressBanlance:${address}`, JSON.stringify(balance), 'EX', 10) // 10s
@@ -218,6 +218,68 @@ mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
   }
 
 })
+
+mainnet.get(`/ticker/info`, async (req: NRequest, res: any) => {
+  try {
+
+    const { symbol } = req.query
+
+    const cache = await redis.get(`ticker:${symbol}`)
+
+    if (cache) {
+      console.log('cache')
+      return res.apiSuccess(JSON.parse(cache))
+    }
+
+    const result = await getCoinInfo(symbol, {
+      quotes: 'CNY,USD'
+    })
+
+
+
+    redis.set(`ticker:${symbol}`, JSON.stringify(result), 'EX', 20) // 20s
+
+
+    // console.log('result',result)
+
+    return res.apiSuccess(result)
+
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+})
+
+
+mainnet.get(`/ticker/history`, async (req: NRequest, res: any) => {
+  try {
+    const { start , end , interval ,symbol } = req.query
+
+    const cache = await redis.get(`ticker:history:${symbol}:${start}:${end}:${interval}`)
+
+    if (cache) {
+      console.log('cache')
+      return res.apiSuccess(JSON.parse(cache))
+    }
+
+    const result = await getCoinHistory(symbol, {
+      start: start,
+      end,
+      interval: interval,
+      quotes: 'USD'
+    })
+
+    // console.log('result',result)
+    redis.set(`ticker:history:${symbol}:${start}:${end}:${interval}`, JSON.stringify(result), 'EX', 20) // 20s
+
+    return res.apiSuccess(result)
+
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+})
+
 export { mainnet }
 
 
