@@ -13,6 +13,7 @@ module.exports = {
     port: 6379, // Redis port
     host: process.env.REDIS_HOST // Redis host,
   },
+  marketAPI: process.env.MARKET_API,
   cache: {
     redisEx: process.env.REDIS_EX
   },
