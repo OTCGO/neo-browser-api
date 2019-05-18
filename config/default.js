@@ -4,6 +4,7 @@ module.exports = {
     port: '5001', // port
     apiPrefix: '/api/v1' // api 前缀
   },
+  RANK_API: process.env.RANK_API,
   neoAPI: process.env.NEOAPI,
   rpc: process.env.RPC,
   network: process.env.NETWORK,

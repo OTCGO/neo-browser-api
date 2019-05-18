@@ -66,6 +66,26 @@ const getAccountState = async (address) => {
 }
 
 
+const getRank = async (assetId,skip,limt) => {
+  //console.log('getRank',`${config.get('RANK_API')}/v2/mainnet/rankings/${assetId}/${skip}/${limt}`)
+  const options = {
+      method: 'GET',
+      url: `${config.get('RANK_API')}/v2/mainnet/rankings/${assetId}?index=${skip}&length=${limt}`,
+      headers:
+      {
+        'content-type': 'application/json'
+      },
+      json: true
+    }
+    return new Promise<string>((resolve, reject) => {
+      request(options, function (error, response, body) {
+        if (error) return reject(error)
+        //console.log('body',body)
+        return resolve(body.data)
+      })
+    })
+}
 
 
-export { getAssetState, getAccountState }
+
+export { getAssetState, getAccountState, getRank }
