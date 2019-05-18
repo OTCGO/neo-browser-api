@@ -20,6 +20,8 @@ import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
 import { DBClient, client as redis } from '../../lib'
 
+import { getRank } from '../../services'
+
 import { getOntBalance, getAccountState, getCoinInfo, getCoinHistory } from '../../services'
 
 import gb from '../../constant/global'
@@ -182,7 +184,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
   }
 })
 
-
+/*
 mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
   try {
     const { start, end } = req.query
@@ -212,6 +214,44 @@ mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
     //   count: count > 500 ? 500 : count,
     //   list
     // })
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+
+})
+
+*/
+
+mainnet.get(`/asset/rank/:asset`, async (req: NRequest, res: any) => {
+  try {
+    const { start, end } = req.query
+    const { asset } = req.params
+
+    // console.log('start',start)
+    // console.log('end',end)
+
+    const cache = await redis.get(`AssetRank:${asset}:${start}:${end}`)
+
+    if (cache) {
+      console.log('cache')
+      return res.apiSuccess(JSON.parse(cache))
+    }
+
+    const count = 500
+    const result = await getRank(asset.substr(2),start, end)
+
+   
+
+    redis.set(`AssetRank:${asset}:${start}:${end}`, JSON.stringify(result), 'EX', 60 * 60) // 10s
+
+    // console.log('list',list)
+    return res.apiSuccess({
+      count: count > 500 ? 500 : count,
+      result
+    })
+
+    
   } catch (error) {
     logger.error('mainnet', error)
     return res.apiError(error)
