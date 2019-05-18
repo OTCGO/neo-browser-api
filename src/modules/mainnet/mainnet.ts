@@ -230,25 +230,27 @@ mainnet.get(`/asset/rank/:asset`, async (req: NRequest, res: any) => {
 
     // console.log('start',start)
     // console.log('end',end)
-
+    const count = 500
     const cache = await redis.get(`AssetRank:${asset}:${start}:${end}`)
 
     if (cache) {
       console.log('cache')
-      return res.apiSuccess(JSON.parse(cache))
+      return res.apiSuccess({
+        count: count,
+        list: JSON.parse(cache)
+      })
     }
 
-    const count = 500
     const result = await getRank(asset.substr(2),start, end)
 
    
 
-    redis.set(`AssetRank:${asset}:${start}:${end}`, JSON.stringify(result), 'EX', 60 * 60) // 10s
+    redis.set(`AssetRank:${asset}:${start}:${end}`, JSON.stringify(result), 'EX', 60 * 30) // 10s
 
     // console.log('list',list)
     return res.apiSuccess({
-      count: count > 500 ? 500 : count,
-      result
+      count: count,
+      list: result
     })
 
     
