@@ -195,6 +195,16 @@ const query = new graphql.GraphQLObjectType({
       }),
       async resolve(root, args) {
 
+
+      try {
+
+        // console.log('args',JSON.stringify(args))
+        const cache = await redis.get(`AssetQuery:${JSON.stringify(args)}`)
+        if (cache) {
+          console.log('cache get')
+          return JSON.parse(cache)
+        }
+
         // if search
         if (args.search) {
           args.$or = [
@@ -209,12 +219,7 @@ const query = new graphql.GraphQLObjectType({
 
         const dbGlobal = await dbGlobalClient.connection()
 
-        try {
-          const cache = await redis.get(`AssetQuery:${JSON.stringify(args)}`)
-          if (cache) {
-            console.log('cache get')
-            return JSON.parse(cache)
-          }
+
 
 
           // console.log('database get')
