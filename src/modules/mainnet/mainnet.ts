@@ -20,7 +20,7 @@ import { api } from '@cityofzion/neon-js'
 import { parallel } from '../../utils/index'
 import { DBClient, client as redis } from '../../lib'
 
-import { getRank } from '../../services'
+import { getRank,getBalance } from '../../services'
 
 import { getOntBalance, getAccountState, getCoinInfo, getCoinHistory } from '../../services'
 
@@ -62,6 +62,21 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
   try {
     const { address } = req.params
 
+    const result = await getBalance(address)
+    return res.apiSuccess(result)
+
+
+  } catch (error) {
+    logger.error('mainnet', error)
+    return res.apiError(error)
+  }
+})
+
+/*
+mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
+  try {
+    const { address } = req.params
+
     const cache = await redis.get(`AddressBanlance:${address}`)
 
     if (cache) {
@@ -71,47 +86,7 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
 
 
 
-    const dbGlobal = await dbGlobalClient.connection()
-
-
-    /*
-    const dbGlobal = await dbGlobalClient.connection()
-    const dbUtxo = await dbUtxolClient.connection()
-    const uxtos = await dbUtxo.utxos.find({address, spent_height: {$exists: false}}).toArray()
-
-
-
-    const obj: any = {}
-    for (const item of uxtos){
-      if (!obj[item.asset]) {
-        obj[item.asset] = []
-      }
-      obj[item.asset].push({prevIndex: item.index, prevHash: item.txid, value: item.value})
-      // globalArr.push(obj)
-    }
-
-    const globalArr = []
-    for (const key in obj) {
-
-      const asset: any = await dbGlobal.asset.findOne({assetId: key})
-
-      let balances: any = 0
-      obj[key].forEach((utxo) => {
-        balances = Decimal.add(balances, utxo.value)
-      })
-      if (asset.name.length > 0) {
-        globalArr.push({
-          assetId: key,
-          name: asset.name[0].name,
-          type: asset.type,
-          balances
-        })
-      }
-
-    }
-
-    */
-
+   
     const globalArr = []
 
 
@@ -183,6 +158,8 @@ mainnet.get(`/address/balances/:address`, async (req: NRequest, res: any) => {
     return res.apiError(error)
   }
 })
+
+*/
 
 /*
 mainnet.get(`/asset/transaction/:asset`, async (req: NRequest, res: any) => {
