@@ -81,7 +81,7 @@ const getRank = async (assetId,skip,limt) => {
       request(options, function (error, response, body) {
         if (error) return reject(error)
         //console.log('body',body)
-        return resolve(body.data)
+        return resolve(body)
       })
     })
 }
