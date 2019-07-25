@@ -214,7 +214,7 @@ mainnet.get(`/asset/rank/:asset`, async (req: NRequest, res: any) => {
       console.log('cache')
       return res.apiSuccess({
         list: JSON.parse(cache).data,
-        count: JSON.parse(cache).count
+        count: JSON.parse(cache).total
       })
     }
 
