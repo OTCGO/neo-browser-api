@@ -35,10 +35,11 @@
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
     "express-graphql": "^0.6.11",
+    "express-rate-limit": "^5.0.0",
     "graphql": "^0.11.7",
     "ioredis": "^3.2.2",
     "joi": "^13.0.1",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.15",
     "log4js": "^1.1.1",
     "method-override": "^2.3.9",
     "mongoose": "^4.13.4",
@@ -55,7 +56,7 @@
     "@types/method-override": "0.0.30",
     "@types/request": "^2.0.8",
     "jake": "^8.0.15",
-    "pre-git": "^3.16.0",
+    "pre-git": "^3.17.1",
     "typescript": "^2.6.2"
   },
   "standard": {
